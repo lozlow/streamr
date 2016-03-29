@@ -1,0 +1,22 @@
+{
+  "name": "streamr",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "most": "^0.18.7",
+    "node-uuid": "^1.4.7",
+    "socket.io": "^1.4.5",
+    "switch-path": "^1.1.5"
+  },
+  "devDependencies": {
+    "express": "^4.13.4",
+    "chai": "^3.5.0",
+    "mocha": "^2.4.5"
+  }
+}

@@ -1,0 +1,18 @@
+<html>
+<head>
+	<title>streamR</title>
+</head>
+<body>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+	var socket = io.connect('/streamr');
+	socket.send('/spaces/list', function(data) {
+		console.log('ack', data);
+	});
+	socket.send('/space/cricket', function(data) {
+		console.log('ack', data);
+	});
+</script>
+</body>
+</html>
