@@ -3,12 +3,21 @@ var server = require('http').Server(app);
 var io = require('socket.io')(server);
 var most = require('most');
 var streamr = require('../lib/streamr');
+var webpack = require('webpack');
 
-app.get('/', function (req, res) {
+app.get('/', function(req, res) {
   res.sendFile(__dirname + '/index.html');
 });
 
-var streamrServer = streamr.app({ compat: streamr.compat.most });
+app.get('/build.js', function(req, res) {
+	webpack(require('./config')).run((err, stats) => {
+		console.log(arguments);
+		console.log(stats.toString());
+		res.sendFile(__dirname + '/build.js');
+	});
+});
+
+var streamrServer = streamr.app({ compat: new streamr.compat.most(most) });
 streamrServer.transport(new streamr.transport.SocketIO(io));
 
 streamrServer.use(
@@ -21,7 +30,7 @@ streamrServer.use(
 streamrServer.use(
 	'/space/:id',
 	function(req) {
-		return most.just(['Cricket', 'Tennis', 'Squash']);
+		return most.periodic(1000, 'b');
 	}
 );
 

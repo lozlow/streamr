@@ -1,8 +1,13 @@
-var streamr = require('streamr');
-var socket = io.connect('http://localhost');
-var client = streamr.client();
+/* global io */
 
-streamr.transport(new streamr.transport.SocketIO(socket));
+var streamr = require('../lib/streamr-client');
+var client = new streamr();
+client.transport(new streamr.transport.SocketIO(io));
+client.req('/spaces/list').then(stream$ => {
+	stream$.observe(console.log.bind(console));
+});
+client.req('/space/cricket').then(stream$ => {
+	stream$.observe(console.log.bind(console));
+});
 
-var space$ = streamr.req('/spaces/list');
-space$.observe(console.log.bind(console));
+// client.req('/spaces/list').observe(console.log.bind(console));

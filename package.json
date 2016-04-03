@@ -15,8 +15,10 @@
     "switch-path": "^1.1.5"
   },
   "devDependencies": {
-    "express": "^4.13.4",
     "chai": "^3.5.0",
-    "mocha": "^2.4.5"
+    "express": "^4.13.4",
+    "mocha": "^2.4.5",
+    "socket.io-client": "^1.4.5",
+    "webpack": "^1.12.14"
   }
 }
