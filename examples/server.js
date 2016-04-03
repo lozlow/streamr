@@ -30,7 +30,7 @@ streamrServer.use(
 streamrServer.use(
 	'/space/:id',
 	function(req) {
-		return most.periodic(1000, 'b');
+		return most.periodic(1000, 'b').take(5);
 	}
 );
 

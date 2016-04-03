@@ -49,7 +49,7 @@
 	var streamr = __webpack_require__(1);
 	var client = new streamr();
 	client.transport(new streamr.transport.SocketIO(io));
-	client.req('/spaces/list').observe(console.log.bind(console));
+	client.req('/spaces/list').observe(console.log.bind(console)).then(console.log.bind(console, 'finished!'));
 	client.req('/space/cricket').observe(console.log.bind(console));
 
 
@@ -83,12 +83,11 @@
 	class SocketIO {
 		constructor(io) {
 			this.io = io;
-			this.streams = {};
 		}
 
 		connect() {
 			this.socket = this.io.connect('/streamr');
-			this.connection$ = most.of(
+			this.connection$ = most.fromPromise(
 				new Promise(resolve => {
 					this.socket.on('connect', () => resolve(this.socket));
 					this.jumbo$ = most.create((add, end, error) => {
@@ -97,7 +96,7 @@
 						this.socket.on('error', error);
 					});
 				})
-			).await();
+			);
 		}
 
 		req(url) {
@@ -108,13 +107,13 @@
 							this.socket.send(
 								url,
 								key => {
-									resolve(this.streams[key] = this.jumbo$.filter(ev => ev.key === key).map(ev => ev.data));
+									resolve(this.jumbo$.filter(ev => ev.key === key).map(ev => ev.data));
 								}
 							);
 						}
 					)
 				)
-			).switch();
+			).skip(1).join();
 		}
 	}
 
