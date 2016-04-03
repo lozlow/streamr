@@ -49,14 +49,8 @@
 	var streamr = __webpack_require__(1);
 	var client = new streamr();
 	client.transport(new streamr.transport.SocketIO(io));
-	// client.req('/spaces/list').then(stream$ => {
-	// 	stream$.observe(console.log.bind(console));
-	// });
-	// client.req('/space/cricket').then(stream$ => {
-	// 	stream$.observe(console.log.bind(console));
-	// });
-
 	client.req('/spaces/list').observe(console.log.bind(console));
+	client.req('/space/cricket').observe(console.log.bind(console));
 
 
 /***/ },
@@ -91,32 +85,36 @@
 			this.io = io;
 			this.streams = {};
 		}
+
 		connect() {
-			var socket = this.io.connect('/streamr');
-			this.connection = new Promise((resolve, reject) => {
-				socket.on('connect', () => resolve(socket));
-				this.jumbo$ = most.create((add, end, error) => {
-					socket.on('message', add);
-					socket.on('disconnect', end);
-				});
-			});
-		}
-		req(url) {
-			return this.connection.then(
-				socket => {
-					// return new Promise((resolve, reject) => {
-					// 	socket.send(url, (key) => {
-					// 		resolve(this.streams[key] = this.jumbo$.filter(ev => ev.key === key).map(ev => ev.data));
-					// 	});
-					// });
-					var g = new Promise((resolve, reject) => {
-						socket.send(url, (key) => {
-							resolve(this.streams[key] = this.jumbo$.filter(ev => ev.key === key).map(ev => ev.data));
-						});
+			this.socket = this.io.connect('/streamr');
+			this.connection$ = most.of(
+				new Promise(resolve => {
+					this.socket.on('connect', () => resolve(this.socket));
+					this.jumbo$ = most.create((add, end, error) => {
+						this.socket.on('message', add);
+						this.socket.on('disconnect', end);
+						this.socket.on('error', error);
 					});
-					return most.fromPromise(g);
-				}
-			);
+				})
+			).await();
+		}
+
+		req(url) {
+			return this.connection$.continueWith(
+				() => most.fromPromise(
+					new Promise(
+						resolve => {
+							this.socket.send(
+								url,
+								key => {
+									resolve(this.streams[key] = this.jumbo$.filter(ev => ev.key === key).map(ev => ev.data));
+								}
+							);
+						}
+					)
+				)
+			).switch();
 		}
 	}
 
